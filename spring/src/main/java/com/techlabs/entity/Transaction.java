@@ -32,7 +32,7 @@ public class Transaction {
     private int receiverAccountNo;
 
     @NotNull
-    @Column(name="customer_id")
+    @Column(name="customer_key")
     private int customerId;
 
     @Column(name="transaction_time")

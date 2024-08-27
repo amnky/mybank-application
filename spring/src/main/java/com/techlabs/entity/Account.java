@@ -24,7 +24,7 @@ public class Account {
     @NotNull(message = "account number can't be null")
     private int AccountNumber;
 
-    @Column(name = "customer_id")
+    @Column(name = "customer_key")
     @NotNull(message = "customerId can't be null")
     private int customerId;
 
