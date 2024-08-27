@@ -1,6 +1,10 @@
 .App {
   text-align: center;
 }
+button[disabled] {
+  pointer-events: none !important; /* Prevent clicks */
+  opacity: 0.5 !important; /* Visual indication of disabled state */
+}
 
 .App-logo {
   height: 40vmin;
