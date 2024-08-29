@@ -238,12 +238,17 @@ public class TransactionServiceImp implements TransactionService {
     private List<TransactionResponseDTO> transactionsToDTO(List<Transaction> transactionList) {
         List<TransactionResponseDTO> transactionResponseDTOList = new ArrayList<>();
         for (Transaction transaction : transactionList) {
-            transactionResponseDTOList.add(new TransactionResponseDTO(transaction.getTransactionId(),
-                    transaction.getSenderAccountNo(), transaction.getReceiverAccountNo(),
-                    transaction.getTransactionAmount(),transaction.getStatus(), transaction.getTransactionTime()));
+            transactionResponseDTOList.add(convertTransactionToResponseDTO(transaction));
         }
         return transactionResponseDTOList;
     }
+
+    private TransactionResponseDTO convertTransactionToResponseDTO(Transaction transaction) {
+        return new TransactionResponseDTO(transaction.getTransactionId(),
+                transaction.getSenderAccountNo(), transaction.getReceiverAccountNo(),
+                transaction.getTransactionAmount(),transaction.getStatus().toString(), transaction.getTransactionTime());
+    }
+
     private void checkAccess(int customerId){
         String customerLoginId = SecurityContextHolder.getContext().getAuthentication().getName();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

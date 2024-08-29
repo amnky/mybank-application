@@ -13,10 +13,14 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -96,7 +100,20 @@ public class AdminController {
     @GetMapping("/download-aadhar/{id}")
     ResponseEntity<Resource> downloadFile(@PathVariable("id") int registeredId) {
         Resource resource = adminService.downloadUserAadhar(registeredId);
+        // Determine content type using the file path
+        String contentType;
+        try {
+            contentType = Files.probeContentType(Paths.get(resource.getFile().getAbsolutePath()));
+            if (contentType == null) {
+                // Fallback to binary type if unable to determine
+                contentType = "application/octet-stream";
+            }
+        } catch (IOException e) {
+            // Log the error and default to binary type
+            contentType = "application/octet-stream";
+        }
         return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }
@@ -150,6 +167,7 @@ public class AdminController {
 
     @PostMapping("/activate-customer/{cid}")
     ResponseEntity<HttpStatus> activateCustomer(@PathVariable("cid") int customerId) {
+        System.out.println("activeate customers is"+customerId);
         adminService.activateCustomer(customerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -161,6 +179,11 @@ public class AdminController {
                                                                             @RequestParam(name = "sortBy", defaultValue = "firstName") String sortBy,
                                                                             @RequestParam(name = "sortDirection", defaultValue = "ASC") String sortDirection) {
         PagedResponse<CustomerResponseDTO> inActiveCustomers = adminService.inActiveCustomer(pageNo, size, sort, sortBy, sortDirection);
+        return new ResponseEntity<>(inActiveCustomers, HttpStatus.OK);
+    }
+    @GetMapping("/inactive-customer/{cid}")
+    ResponseEntity<CustomerResponseDTO> seeInActiveCustomerById(@PathVariable("cid")int customerId) {
+        CustomerResponseDTO inActiveCustomers = adminService.seeInActiveCustomerById(customerId);
         return new ResponseEntity<>(inActiveCustomers, HttpStatus.OK);
     }
 

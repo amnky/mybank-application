@@ -18,7 +18,7 @@ public class TransactionResponseDTO {
     private int SenderAccountNo;
     private int ReceiverAccountNo;
     private int amount;
-    private Boolean status;
+    private String status;
     private LocalDateTime transactionDate;
 
 

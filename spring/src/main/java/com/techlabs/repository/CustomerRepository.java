@@ -23,7 +23,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
 
     Customer findByAccountNumberAndIsActiveTrue(int receiverAccountNumber);
     @Query("SELECT c.identificationNumber FROM Customer c WHERE c.customerId = :customerId and isActive=true")
-    int findUniqueIdentityByCustomerIdAndIsActive(@Param("customerId") int customerId);
+    Integer findUniqueIdentityByCustomerIdAndIsActive(@Param("customerId") int customerId);
     @Query("SELECT SUM(c.balance) FROM Customer c WHERE c.identificationNumber = :uniqueIdentity and isActive=true")
     int findBalancesByUniqueIdentityAndIsActive(@Param("uniqueIdentity")int identity);
 
@@ -39,4 +39,6 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
 
     @Query("Select c.balance from Customer c where c.customerId=:customerId and c.isActive=true")
     int findBalanceByCustomerId(@Param("customerId") int customerId);
+
+    Customer findByCustomerIdAndIsActiveFalse(int customerId);
 }

@@ -114,6 +114,15 @@ public class AdminServiceImp implements AdminService {
     }
 
     @Override
+    public CustomerResponseDTO seeInActiveCustomerById(int customerId) {
+        Customer customer=customerRepository.findByCustomerIdAndIsActiveFalse(customerId);
+        if (customer == null) {
+            throw new CustomerNotFoundException("customer is already in-active");
+        }
+        return inactiveCustomerToCustomerResponseDTO(customer);
+    }
+
+    @Override
     public CustomerResponseDTO verifyAndAddAccount(int registeredId) {
         checkAdminAccess();
         Registered registeredCustomer = registeredRepository.findById(registeredId).
@@ -202,7 +211,7 @@ public class AdminServiceImp implements AdminService {
     @Override
     public void activateCustomer(int customerId) {
         checkAdminAccess();
-        Customer customer1 = customerRepository.findByCustomerIdAndIsActiveTrue(customerId);
+        Customer customer1 = customerRepository.findByCustomerIdAndIsActiveFalse(customerId);
         if (customer1 == null) {
             throw new CustomerNotFoundException("customer is already active");
         }

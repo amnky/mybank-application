@@ -23,4 +23,7 @@ public interface AdminService {
     Resource downloadUserAadhar(int registeredId);
 
     RegisterDTO seeRegisteredUserProfile(int registeredId);
+
+    CustomerResponseDTO seeInActiveCustomerById(int customerId);
+
 }
