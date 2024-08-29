@@ -19,7 +19,7 @@ const ViewAllCustomers = () => {
   const filterLastName = searchParams.get("lastName") || "";
 
   const handleProfileButton=(customerId)=>{
-    navigate(`/customer/profile/${customerId}`)
+    navigate(`/admin/inactive-customer/${customerId}`)
   }
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const ViewAllCustomers = () => {
           pageNo: currentPage,
           size: itemsPerPage,
         };
-        const response = await ApiService.getAllCustomers(params);
+        const response = await ApiService.getAllInactiveCustomers(params);
 
         setCustomers(response.data.pagedData);
         setTotalPages(response.data.totalPages);

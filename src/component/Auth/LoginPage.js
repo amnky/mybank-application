@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { toast } from 'react-toastify'; 
+import ApiService from '../SharedComponent/Services/ApiServices';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -9,17 +10,15 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-  
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
-        "username": username,
-        "password": password
-      });
+      const response=await ApiService.loginUser(username,password)
       if (response.status === 200) {
         const data = response.data;
+        console.log("logins is",response.data)
         localStorage.setItem('customerId', data.customerId);
         localStorage.setItem('cookie', data.cookie);
         localStorage.setItem('role',data.userRole)
+        toast.success("login success")
         if (data.userRole==="ADMIN")
         {
           navigate('admin/dashboard');
@@ -30,12 +29,14 @@ const LoginPage = () => {
         }
         
       } else {
-        const errorData = response.data; 
-        setError(errorData.message || 'An error occurred during login.');
+        const errorData = response.data;
+        console.log("in error",response) 
+        setError('An error occurred during login.');
       }
     } catch (err) {
+      console.log("in catch error") 
       console.error("Axios Error:", err);
-      setError(err.response.data.message || 'An error occurred during login.');
+      setError('An error occurred during login.');
     }
   };
   return (

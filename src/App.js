@@ -11,10 +11,12 @@ import CustomerDashboard from './component/Customer/CustomerDashboard';
 import ViewAllRegisteredCustomers from './component/Admin/ViewAllRegisteredCustomers';
 import AddCustomerAccount from './component/Admin/AddCustomerAccount';
 import AllTransactions from './component/SharedComponent/AllTransactions';
-import PersistentHeader from './component/PersistentHeader';
+import PersistentHeader from './component/SharedComponent/PersistentHeader';
 import Profile from './component/SharedComponent/Profile';
-
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import InactiveCustomers from './component/Admin/InactiveCustomers';
+import InactiveProfile from './component/SharedComponent/InactiveProfile';
 function App() {
   return (
     <div className="App">
@@ -25,10 +27,10 @@ function App() {
         <Route path="/" element={<LoginPage/>}/>
         <Route path="/register" element={<CustomerRegistration/>}></Route>
         <Route
-                path="/*" // Match all other routes
+                path="/*"
                 element={
                   <>
-                    <PersistentHeader /> {/* Render the header for all other routes */}
+                    <PersistentHeader />
                     <Routes>
                      
         <Route path="customer/dashboard" element={<CustomerDashboard/>}></Route>
@@ -46,16 +48,16 @@ function App() {
         <Route path="admin/add-registered-customers" element={<AddCustomerAccount/>}></Route>
         <Route path="admin/registered-customer/:id" element={<AddCustomerAccount/>}></Route>
         <Route path="admin/dashboard" element={<AdminDashBoard/>}></Route>
+        <Route path="admin/inactive-customers" element={<InactiveCustomers/>}></Route>
+        <Route path="admin/inactive-customer/:id" element={<InactiveProfile/>}></Route>
                     </Routes>
                   </>
                 }
-                />
-               
-
-      
+                />      
       </Routes>
     </BrowserRouter>
     </AppProvider>
+    <ToastContainer />
     </div>
   );
 }

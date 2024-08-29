@@ -16,6 +16,9 @@ const AdminDashBoard = () => {
           <Link to="/admin/all-registered-customers" className="block p-4 bg-gray-700 rounded hover:bg-gray-600 text-center">
             Registered Users
           </Link>
+          <Link to="/admin/inactive-customers" className="block p-4 bg-gray-700 rounded hover:bg-gray-600 text-center">
+            Inactive Customers
+          </Link>
         </div>
       </div>
       <div className="w-full max-w-4xl p-4">

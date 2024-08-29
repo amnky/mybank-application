@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { toast } from 'react-toastify'; 
+import ApiService from '../SharedComponent/Services/ApiServices';
 
 const PerformTransaction = () => {
   const [fromAccount, setFromAccount] = useState('');
@@ -12,7 +13,7 @@ const PerformTransaction = () => {
     e.preventDefault();
 
     try {
-      const token = localStorage.getItem('cookie'); // Get JWT token
+      const token = localStorage.getItem('cookie');
       const customerId=localStorage.getItem('customerId')
       const body={
         senderCustomerId:customerId,
@@ -20,31 +21,31 @@ const PerformTransaction = () => {
         transactionAmount: amount
       }
 
-      const response = await axios.post(
-        'http://localhost:8080/api/customer/transactions',body,{
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        }
-      );
+      const response=await ApiService.PerformTransaction(body)
       if(response.data.status===false){
          setError("Transaction failed")
+         toast.error('Transaction failed.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnFocusLoss: false,
+          draggable: true,
+          progress: undefined,
+        });
        }
        else{
         setSuccess(`Transaction successful! with transaction id ${response.data.transactionId}`);
-        setError(''); // Clear any previous errors
+        setError('');
        }
-      // Handle success response
-      
       
     } catch (error) {
-      // Handle error response
       if (error.response && error.response.data) {
         setError(error.response.data.message || 'An error occurred');
       } else {
         setError('An error occurred');
       }
-      setSuccess(''); // Clear any success message
+      setSuccess('');
     }
   };
 

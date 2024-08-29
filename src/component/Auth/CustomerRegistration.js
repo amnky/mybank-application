@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { toast } from 'react-toastify'; 
 import { Link } from 'react-router-dom';
+import ApiService from '../SharedComponent/Services/ApiServices';
 const CustomerRegistration = () => {
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');
@@ -26,15 +27,11 @@ const CustomerRegistration = () => {
       formData.append('file', file);
   
       try {
-        const response = await axios.post(`http://localhost:8080/api/auth/register/${id}/${uid}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const response =await ApiService.uploadDocument(id,uid,formData)
         setMessage('File uploaded successfully');
+        toast.success("registration success")
         console.log(response.data);
         
-        // Perform additional actions if needed
       } catch (error) {
         console.error(error);
         setMessage('Failed to upload file');
@@ -51,7 +48,7 @@ const CustomerRegistration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/register', formData);
+      const response =await ApiService.registerUserRequest(formData)
     //   setRegisterId(response.data)
       console.log("response from first api is :",response.data)
       handleSubmitDocument(response.data,formData.uniqueIdentificationNumber)

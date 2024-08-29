@@ -1,6 +1,7 @@
 import React,{ useEffect, useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ApiService from './Services/ApiServices';
 
 function PersistentHeader() {
   const role=localStorage.getItem('role')
@@ -11,33 +12,25 @@ function PersistentHeader() {
   useEffect(() => {
   const handleBalance=async()=>{
     try{
-      const response = await axios.get(`http://localhost:8080/api/customer/accounts-balances`,{
-        headers: {
-          'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-        }
-        
-      });
+      const response=await ApiService.getAllAccountsBalances()
       setBalance(response.data)
     }
     catch(err){
       console.log(err.message)
     }
   }
-  handleBalance()
+  (role==="CUSTOMER" && handleBalance())
   const handleCurrentBalance=async()=>{
   try{
-    const response = await axios.get(`http://localhost:8080/api/customer/accounts-balance/${customerId}`,{
-      headers: {
-        'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-      }
-    });
+    const response=await ApiService.getCurrentBalance(customerId)
     setCurrentBalance(response.data)
   }
   catch(err){
     console.log(err.message)
   }
 }
-handleCurrentBalance()
+
+(role==="CUSTOMER" && handleCurrentBalance())
 }
 )
     const navigate=useNavigate()
@@ -54,11 +47,11 @@ handleCurrentBalance()
       {/* User Profile Section */}
       <div className="flex items-center" onClick={handleProfile}>
         <img 
-          src="/user-avatar.png" // Replace with your actual avatar path
+          src="/user-avatar.png" 
           alt="User Avatar" 
           className="h-10 w-10 rounded-full mr-2" 
         />
-        <span className="font-semibold">Profile</span> {/* Replace with actual user name */}
+        <span className="font-semibold">Profile</span>
       </div>
 
       {/* Navigation */}
@@ -78,10 +71,11 @@ handleCurrentBalance()
           <li><Link to="/customer/perform-transactions" className="hover:text-gray-300">Perform Transacations</Link></li>
           <li><Link to="/customer/view-transactions" className="hover:text-gray-300">My Transacations</Link></li>
         </ul>
+        {role==="CUSTOMER" && 
         <div class="flex justify-between">
-  <p class="text-blue-500">My Balance {balance}</p>
+   <p class="text-blue-500">My Balance {balance}</p>
   <p class="text-green-500">Current Account Balance {currentBalance}</p>
-</div>
+</div>}
         
       </nav>
       

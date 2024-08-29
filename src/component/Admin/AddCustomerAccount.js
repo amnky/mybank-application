@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Button } from 'bootstrap';
+import { toast } from 'react-toastify'; 
 import { useParams,useNavigate } from 'react-router-dom';
+import ApiService from '../SharedComponent/Services/ApiServices';
 
 function AddCustomerAccount() {
   const navigate=useNavigate()
@@ -17,20 +17,13 @@ function AddCustomerAccount() {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isDisabled, setDisabled] = useState(true); // Initially disabled
+  const [isDisabled, setDisabled] = useState(true);
   const handleUpdateProfile=async(e)=>{
     try{
         
-      const token = localStorage.getItem('cookie');
-    
-        
-        const response = await axios.post(`http://localhost:8080/api/admin/pending-accounts/${id}`,{}, {
-          headers: {
-            'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-          }
-          
-        });
-        navigate('/admin/all-registered-customers')
+      await ApiService.addAccount(id)
+      toast.success("customer added successfully!")
+      navigate('/admin/all-registered-customers')
     }
     catch(err){
         console.log("error is : ",err.message)
@@ -41,12 +34,8 @@ function AddCustomerAccount() {
   }
   const handleDeleteCustomer=async(e)=>{
     try{
-      const token=localStorage.getItem('cookie')
-      const response = await axios.delete(`http://localhost:8080/api/admin/pending-accounts/${id}`,{
-      headers: {
-          'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-        },
-      });
+      await  ApiService.deleteRegisteredUser(id)
+      toast.success("customer deleted successfully!")
       navigate('/admin/all-registered-customers')
     }
     catch(err){
@@ -58,41 +47,38 @@ function AddCustomerAccount() {
     e.preventDefault()
     try{
       const token=localStorage.getItem('cookie')
-      const response = await axios.get(`http://localhost:8080/api/admin/download-aadhar/${id}`,{
-      headers: {
-          'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-        },
-        responseType: 'blob',
-      });
-      // Extract filename from Content-Disposition header
-    const contentDisposition = response.headers['content-disposition'];
-    let filename = 'downloaded_file'; // Default filename
+      const response=await ApiService.downloadAadhar(id)
 
-    if (contentDisposition && contentDisposition.includes('filename=')) {
-      filename = contentDisposition
-        .split('filename=')[1]
-        .split(';')[0]
-        .replace(/['"]/g, ''); // Remove quotes if any
-    } else {
-      // Optional: Extract file extension from response data if possible
-      const contentType = response.headers['content-type'];
-      const extension = contentType.split('/')[1];
-      filename = `downloaded_file.${extension}`;
+  const contentDisposition = response.headers['content-disposition'];
+  let filename = 'downloaded_file.xlsx';
+
+  if (contentDisposition && contentDisposition.includes('filename=')) {
+    filename = contentDisposition
+      .split('filename=')[1]
+      .split(';')[0]
+      .replace(/['"]/g, ''); 
+  } else {
+    const contentType = response.headers['content-type'];
+    if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      filename = 'downloaded_file.xlsx';
     }
+    else{
 
-    // Create a URL for the blob object
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const extension = contentType ? contentType.split('/')[1] : 'bin'; 
+    filename = `downloaded_file.${extension}`;
+    }
+  }
 
-    // Create a link and trigger the download
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
+  const url = window.URL.createObjectURL(new Blob([response.data]));
 
-    // Clean up
-    link.parentNode.removeChild(link);
-    window.URL.revokeObjectURL(url);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+
+  link.remove();
+  window.URL.revokeObjectURL(url);
     }
     catch(err){
 
@@ -106,17 +92,13 @@ function AddCustomerAccount() {
         setEmail(response.data.email)
         setAddress(response.data.address)
         setNomineeName(response.data.nomineeName)
-        setAadhar(response.data.identificationNumber)
+        setAadhar(response.data.uniqueIdentificationNumber)
   }
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        // console.log("id is :",id)
         const token=localStorage.getItem('cookie')
-        const response = await axios.get(`http://localhost:8080/api/admin/pending-account/${id}`,{
-        headers: {
-            'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-          },});
+        const response =await ApiService.getPendingAccount(id)
         handleChangeData(response)
         setLoading(false);
       } catch (error) {
@@ -140,7 +122,7 @@ function AddCustomerAccount() {
 
       <h1 className="text-3xl font-bold mb-4">User Profile</h1>
       <button 
-        onClick={handleEditProfile} // Attach the click handler
+        onClick={handleEditProfile} 
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
       >
        Edit Profile
@@ -253,13 +235,13 @@ function AddCustomerAccount() {
       </div>
       <div className='flex flex-col space-y-4 p-4 bg-gray-100 rounded-md'>
       <button 
-        onClick={handleUpdateProfile} // Attach the click handler
+        onClick={handleUpdateProfile} 
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
       >
         Add Customer
       </button>
       <button 
-        onClick={handleDeleteCustomer} // Attach the click handler
+        onClick={handleDeleteCustomer}
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
       >
         Delete Customer

@@ -1,14 +1,26 @@
 import React, { useState ,useEffect } from 'react'
-import axios from 'axios';
-import RegisteredCustomers from '../SharedComponent/Pagination/RegisteredCustomers';
+import { toast } from 'react-toastify';
+import ApiService from '../SharedComponent/Services/ApiServices';
+import Table from '../SharedComponent/Tables/Table';
+import ViewCustomersFilter from './ViewCustomersFilter';
+import { useSearchParams } from 'react-router-dom';
+import ViewRegisteredUsersFilter from './ViewRegisteredUsersFilter';
+import { useNavigate } from 'react-router-dom';
 const ViewAllRegisteredCustomers = () => {
+  const navigate=useNavigate()
   const [registeredCustomers,setRegisteredCustomers]=useState([])
-  const [filterfirstName, setFilterfirstName] = useState('');
-  const [filterlastName, setFilterlastName] = useState('');
-  const [currentPage, setCurrentPage] = useState(0); // Backend page index starts from 0
-  const [totalPages, setTotalPages] = useState(1); // Total pages from the backend
-  const [itemsPerPage] = useState(10); // Number of transactions per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [filterEmail,setFilterEmail]=useState('')
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterfirstName = searchParams.get("firstName") || "";
+  const filterlastName = searchParams.get("lastName") || "";
+
+  const handleRegisteredUsersProfile=(id)=>{
+    navigate(`/admin/registered-customer/${id}`)
+  }
+
 
 
   useEffect(() => {
@@ -19,70 +31,66 @@ const ViewAllRegisteredCustomers = () => {
             pageNo: currentPage,
             size: itemsPerPage,
           };
-        const response = await axios.get('http://localhost:8080/api/admin/pending-accounts', {
-          headers: {
-            'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-          },
-          params: params
-        });
-
-        // Set transactions and pagination data
+        const response=await ApiService.getAllPendingAccounts(params)
+        toast.success("registered fetch successfully!")
         setRegisteredCustomers(response.data.pagedData);
         setTotalPages(response.data.totalPages);
-        // console.log("response data is: ", response.data);
       } catch (error) {
         console.error('Error fetching transaction data:', error);
-        // Handle the error gracefully, perhaps display an error message to the user
       }
     };
 
-    fetchData(); // Call the function to fetch data when the component mounts or page changes
+    fetchData(); 
   }, [currentPage, itemsPerPage]);  
 
+// Filtering customers based on the search parameters
+const filteredCustomers = registeredCustomers.filter((customer) => {
 
-  const filteredCustomers = registeredCustomers.filter(registeredcustomers => {
+  const firstNameMatch =
+    !filterfirstName ||
+    customer.firstName.toLowerCase().includes(filterfirstName.toLowerCase());
+  const lastNameMatch =
+    !filterlastName ||
+    customer.lastName.toLowerCase().includes(filterlastName.toLowerCase());
 
-    const firstNameMatch = 
-    filterfirstName === '' || 
-    registeredcustomers.firstName
-        .toString()
-        .toLowerCase()
-        .includes(filterfirstName.toLowerCase());
-    const lastNameMatch = 
-    filterlastName === '' || 
-    registeredcustomers.lastName
-        .toString()
-        .toLowerCase()
-        .includes(filterlastName.toLowerCase());
+  return firstNameMatch && lastNameMatch;
+});
 
-    
-    const email = 
-    filterEmail === '' || 
-    registeredcustomers.email
-        .toString()
-        .toLowerCase()
-        .includes(filterEmail.toLowerCase());
-    
-    return email && firstNameMatch && lastNameMatch;
-  });
   const paginate = (pageNumber) => setCurrentPage(pageNumber - 1);
   return (
-    <div className="p-4">
-      <RegisteredCustomers 
-      paginate={paginate}
-      registeredCustomers={registeredCustomers}
-      currentPage={currentPage}
-      setCurrentPage={setCurrentPage}
-      totalPages={totalPages}
-      itemsPerPage={itemsPerPage}
-      filterfirstName={filterfirstName}
-      filterlastName={filterlastName}
-      filterEmail={filterEmail}
-      setFilterEmail={setFilterEmail}
-      setFilterfirstName={setFilterfirstName}
-      setFilterlastName={setFilterlastName}
-      filteredCustomers={filteredCustomers}/>
+    <div className="view-customers-container">
+      <ViewRegisteredUsersFilter
+        data={filteredCustomers}
+        searchParams={searchParams}
+        setSearchParams={setSearchParams}
+      />
+      <Table
+        data={filteredCustomers}
+        searchParams={searchParams}
+        setSearchParams={setSearchParams}
+        paginate={paginate}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        handleClicked={handleRegisteredUsersProfile}
+      />
     </div>
+    // <div className="p-4">
+    //   <RegisteredCustomers 
+    //   paginate={paginate}
+    //   registeredCustomers={registeredCustomers}
+    //   currentPage={currentPage}
+    //   setCurrentPage={setCurrentPage}
+    //   totalPages={totalPages}
+    //   itemsPerPage={itemsPerPage}
+    //   filterfirstName={filterfirstName}
+    //   filterlastName={filterlastName}
+    //   filterEmail={filterEmail}
+    //   setFilterEmail={setFilterEmail}
+    //   setFilterfirstName={setFilterfirstName}
+    //   setFilterlastName={setFilterlastName}
+    //   filteredCustomers={filteredCustomers}/>
+    // </div>
   )
 }
 
